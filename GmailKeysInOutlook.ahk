@@ -16,6 +16,8 @@
 ;*******************************************************************************
 ;				                          Version History					
 ;*******************************************************************************
+; Version 2.2 - updated to use Outlook 2013 and groups so that it works on some 
+;               other windows as well
 ; Version 2.1 - updated to use ClearContext v5
 ; Version 2.0 - updated by Ty Myrick to work with Outlook 2010 
 ; Version 1.0 - updated by Lowell Heddings 
@@ -31,16 +33,21 @@
 SendMode Input ; Recommended for new scripts due to its superior speed and reliability.
 SetTitleMatchMode 2 ;allow partial match to window titles
 
+GroupAdd, GroupOutlook, - Outlook ahk_class rctrl_renwnd32  	; Office 2013 Main Mail window
+GroupAdd, GroupOutlook, - Message ahk_class rctrl_renwnd32  	; Office 2013 Open Message window
+GroupAdd, GroupOutlook, ahk_class #32770 			; Office 2013 - reminders popup 
+return
 
-
+;next line was to test the GroupAdd
+;Numpad5::GroupActivate, GroupOutlook ; Assign a hotkey to visit each Outlook window, one at a time.
 
 ;************************
-;Hotkeys for Outlook 2010 
+;Hotkeys for Outlook 2013
 ;************************
 
 ;As best I can tell, the window text 'NUIDocumentWindow' is not present on any other items except the main window. Also, I look for the phrase ' - Microsoft Outlook' in the title, which will not appear in the title (unless a user types this string into the subject of a message or task).
-; #32770
-	#IfWinActive, - Outlook ahk_class rctrl_renwnd32  ; Office 2013
+	#IfWinActive, ahk_group GroupOutlook ; Office 2013
+	;#IfWinActive, - Outlook ahk_class rctrl_renwnd32  ; Office 2013
 	;#IfWinActive, - Outlook ahk_class rctrl_renwnd32, NUIDocumentWindow ; Office 2013
 	;#IfWinActive, - Microsoft Outlook ahk_class rctrl_renwnd32, NUIDocumentWindow ; Office 2010
 	;#IfWinActive, - Microsoft Outlook ahk_class rctrl_renwnd32, NUIDocumentWindow or #IfWinActive,  ahk_class #32770
@@ -48,8 +55,8 @@ SetTitleMatchMode 2 ;allow partial match to window titles
         ;IfWinActive,ahk_class rctrl_renwnd32
 
 ;               y::HandleOutlookKeys("^+1", "y") 		;archive message using Quick Steps hotkey  
-		y::HandleOutlookKeys("!YY5", "y") 		;using ClearContext , send thread to pre-selected Project
-		+Y::HandleOutlookKeys("!YY8", "+Y") 		;using ClearContext , pick new Project and send message
+		e::HandleOutlookKeys("!YY5", "e") 		;archive using ClearContext , send thread to pre-selected Project
+		+e::HandleOutlookKeys("!YY8", "+e") 		;using ClearContext , pick new Project and send message
 		#::HandleOutlookKeys("^d", "#") 		;delete message using regular Control D
 		f::HandleOutlookKeys("^f", "f") 		;forwards message 
 		r::HandleOutlookKeys("^r", "r") 		;replies to message 
@@ -75,21 +82,26 @@ SetTitleMatchMode 2 ;allow partial match to window titles
 
 	HandleOutlookKeys( specialKey, normalKey ) 
 	{
+		OutputDebug, DEBUG:HandleOutlookKeys
 		;Activates key only on main outlook window, not messages, tasks, contacts, etc. 
 		;IfWinActive, - Microsoft Outlook ahk_class rctrl_renwnd32, NUIDocumentWindow, ,  ;NUIDocumentWindow, what is that?
 		;IfWinActive, - Microsoft Outlook ahk_class rctrl_renwnd32, , ,   ;Office2010
-		IfWinActive, - Outlook ahk_class rctrl_renwnd32, , ,   ;Office2013
+		;IfWinActive, - Outlook ahk_class rctrl_renwnd32, , ,   ;Office2013
+		IfWinActive, ahk_group GroupOutlook ; Office 2013
       		{
 
 			;Find out which control in Outlook has focus
 			ControlGetFocus currentCtrl, A 
 			;MsgBox, Control with focus = %currentCtrl%, 
-			;OutputDebug, DEBUG:currentCtrl: %currentCtrl%
+			OutputDebug, DEBUG:currentCtrl: %currentCtrl%
 
 			;Set list of controls that should respond to specialKey. Controls are the list of emails and the main (and minor) controls of the reading pane, including controls when viewing certain attachments.
 			;Currently I handle archiving when viewing attachments of Word, Excel, Powerpoint, Text, jpgs, pdfs
 			;The control 'RichEdit20WPT1' (email subject line) is used extensively for inline editing. Thus it had to be removed. If an email's subject has focus, it won't archive...
-			ctrlList = Acrobat Preview Window1,AfxWndW5,AfxWndW6,EXCEL71,MsoCommandBar1,OlkPicturePreviewer1,paneClassDC1, RichEdit20WPT2,RichEdit20WPT4,RichEdit20WPT5,RICHEDIT50W1,SUPERGRID2,SUPERGRID1,_WwG1,OutlookGrid1,OutlookGrid2
+			;   also: RichEdit20WPT2 RichEdit20WPT4 _WwG1
+			;OutlookGrid1,OutlookGrid2, = Main Message Window
+			;SysListView321 = Reminders
+			ctrlList = Acrobat Preview Window1,AfxWndW5,AfxWndW6,EXCEL71,MsoCommandBar1,OlkPicturePreviewer1,paneClassDC1,RichEdit20WPT5,RICHEDIT50W1,SUPERGRID2,SUPERGRID1,OutlookGrid1,OutlookGrid2,SysListView321
 
 			if currentCtrl in %ctrlList%
 				{
