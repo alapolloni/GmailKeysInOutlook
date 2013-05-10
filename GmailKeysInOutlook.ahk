@@ -34,14 +34,18 @@
 #NoEnv ; Recommended for performance and compatibility with future AutoHotkey releases.
 SendMode Input ; Recommended for new scripts due to its superior speed and reliability.
 SetTitleMatchMode 2 ;allow partial match to window titles
-
+;SetTitleMatchMode, slow  ; look in the slow section
 GroupAdd, GroupOutlook, - Outlook ahk_class rctrl_renwnd32  	; Office 2013 Main Mail window
 GroupAdd, GroupOutlook, - Message ahk_class rctrl_renwnd32  	; Office 2013 Open Message window
+GroupAdd, GroupOutlook, - Message ahk_class rctrl_renwnd32,,,,S&ubject
+;GroupAdd, GroupOutlook, - Message (,,,,S&ubject
 GroupAdd, GroupOutlook, ahk_class #32770 			; Office 2013 - reminders popup 
+;GroupAdd, GroupOutlook, - Message (,,,,Fro&m
+
 return
 
 ;debug: next line was to test the GroupAdd
-;Numpad5::GroupActivate, GroupOutlook ; Assign a hotkey to visit each Outlook window, one at a time.
+Numpad5::GroupActivate, GroupOutlook ; Assign a hotkey to visit each Outlook window, one at a time.
 
 ;************************
 ;Hotkeys for Outlook 2013
@@ -70,6 +74,7 @@ return
 		/::HandleOutlookKeys("^e", "/") 		;focus search box 
 		.::HandleOutlookKeys("+{F10}", ".") 		;Display context menu 
 		l::HandleOutlookKeys("!3", "l") 		;categorize message by calling All Categories hotkey from Quick Access Toolbar 
+		?::HandleOutlookKeys("?", "?") 		;categorize message by calling All Categories hotkey from Quick Access Toolbar 
 	#IfWinActive
 
 ;Passes Outlook a special key combination for custom keystrokes or normal key value, depending on context
@@ -91,14 +96,49 @@ return
 			;         _WwG1 (but also for the readonly message window)
 			;OutlookGrid1,OutlookGrid2, = Main Message Window
 			;SysListView321 = Reminders
-			ctrlList = Acrobat Preview Window1,AfxWndW5,AfxWndW6,EXCEL71,MsoCommandBar1,OlkPicturePreviewer1,paneClassDC1,RichEdit20WPT5,RICHEDIT50W1,SUPERGRID2,SUPERGRID1,OutlookGrid1,OutlookGrid2,SysListView321
-
+			;NetUIHWND = message top title.
+			ctrlList = Acrobat Preview Window1,AfxWndW5,AfxWndW6,EXCEL71,MsoCommandBar1,OlkPicturePreviewer1,paneClassDC1,RichEdit20WPT5,RICHEDIT50W1,SUPERGRID2,SUPERGRID1,OutlookGrid1,OutlookGrid2,SysListView321, SysListView32,NetUIHWND,NetUIHWND1 
 			if currentCtrl in %ctrlList%
 				{
+				;MsgBox, %normalKey% 
 				;OutputDebug, DEBUG:Control in list.  Sending specialKey: %specialKey%
-				;MsgBox, Control in list.
-				Send %specialKey%
-         			} 
+				;if %normalKey% = "\?"
+				if (normalKey = "?")
+					{
+					MsgBox, 
+						(
+	Available Key ShortCuts	
+	# Win (Windows logo key) 
+	+ Shift
+
+e	;archive using ClearContext , send thread to pre-selected Project
++e	;using ClearContext , pick new Project and send message
+# 	;delete message using regular Control D
+f 	;forwards message 
+r 	;replies to message 
+a 	;reply all 
++u 	;marks messages as unread 
++i 	;marks messages as read 
+j 	;move down in list 
++j 	;move down and select next item 
+k	;move up 
++k 	;move up and select next item 
+o	;open message
+s	;set follow up options (star) 
+c	;new message 
+/	;focus search box 
+. 	;Display context menu 
+l	;categorize message by calling All Categories hotkey from Quick Access Toolbar 
+?	;this help
+						)
+
+					}
+				else
+					{
+					;MsgBox, Control in list.
+					Send %specialKey%
+         				} 
+				}
 			;Allow typing normalKey somewhere else in the main Outlook window. (Like the search field or the folder pane.)
 			else 
 				{
