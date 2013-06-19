@@ -10,8 +10,9 @@
 ; Original script by: 	Jayp 
 ; Original URL: 			http://www.ocellated.com/2009/03/18/pimping-microsoft-outlook/
 ;
-; Script Function: Gmail Keys adds Gmail Shortcut Keys to Outlook 
-; Version 2.x updated for Outlook 2010 
+; Script Function: Gmail Keys adds Gmail Shortcut Keys to Outlook 2013
+;			Caveat. This works best if you use the Reading Pane to read emails.  This is because if the hotkeys don't work when opening an email in a seperate window.
+;
 ;
 ;*******************************************************************************
 ;				                          Version History					
